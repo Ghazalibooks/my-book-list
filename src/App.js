@@ -1,54 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom'; // useNavigate in einer Komponente mit Router-Kontext verwenden
+import Signup from './Signup';
+import Login from './Login';
+import BookList from './BookList';
+import Profile from './Profile';
+import { auth } from './firebase';
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 function App() {
-  const [books, setBooks] = useState([]);
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [status, setStatus] = useState('reading');
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();  // Dies wird jetzt sicher innerhalb des Router-Kontexts verwendet
 
-  const addBook = () => {
-    setBooks([...books, { title, author, status }]);
-    setTitle('');
-    setAuthor('');
+  useEffect(() => {
+    // Überwache den Anmeldestatus
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    setUser(null);
+    navigate('/login'); // Nach Abmeldung zum Login weiterleiten
   };
 
   return (
-    <div className="App">
-      <h1>My Book List</h1>
-      
-      <div className="add-book">
-        <input 
-          type="text" 
-          placeholder="Book Title" 
-          value={title} 
-          onChange={(e) => setTitle(e.target.value)} 
-        />
-        <input 
-          type="text" 
-          placeholder="Author" 
-          value={author} 
-          onChange={(e) => setAuthor(e.target.value)} 
-        />
-        <select value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="reading">Currently Reading</option>
-          <option value="read">Read</option>
-        </select>
-        <button onClick={addBook}>Add Book</button>
-      </div>
-
-      <h2>Currently Reading</h2>
-      <ul>
-        {books.filter(book => book.status === 'reading').map((book, index) => (
-          <li key={index}>{book.title} by {book.author}</li>
-        ))}
-      </ul>
-
-      <h2>Read</h2>
-      <ul>
-        {books.filter(book => book.status === 'read').map((book, index) => (
-          <li key={index}>{book.title} by {book.author}</li>
-        ))}
-      </ul>
+    <div>
+      <nav>
+        <Link to="/login">Anmelden</Link> | <Link to="/signup">Registrieren</Link>
+        {user && (
+          <div style={{ float: 'right' }}>
+            <span>{user.displayName}</span>
+            {user.photoURL && <img src={user.photoURL} alt="Profilbild" width="30" style={{ borderRadius: '50%', marginLeft: '10px' }} />}
+            <Link to="/profile" style={{ marginLeft: '10px' }}>Profil bearbeiten</Link>
+            <button onClick={handleLogout} style={{ marginLeft: '10px' }}>Abmelden</button>
+          </div>
+        )}
+      </nav>
+      <Routes>
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/" element={<BookList />} />
+      </Routes>
     </div>
   );
 }
