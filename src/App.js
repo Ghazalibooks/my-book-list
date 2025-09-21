@@ -1,29 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom'; // useNavigate in einer Komponente mit Router-Kontext verwenden
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import Signup from './Signup';
 import Login from './Login';
 import BookList from './BookList';
 import Profile from './Profile';
-import { auth } from './firebase';
+import { auth, db } from './firebase'; // Stellt sicher, dass 'db' hier importiert wird
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import { collection, getDocs } from "firebase/firestore"; // Import für die Datenbank-Abfrage
 
 function App() {
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();  // Dies wird jetzt sicher innerhalb des Router-Kontexts verwendet
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Überwache den Anmeldestatus
+    // 1. Überwacht den Anmeldestatus des Benutzers
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
 
+    // 2. Testet die Verbindung zur Firestore-Datenbank beim Start der App
+    const testDbConnection = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "books"));
+        console.log("🎉 Datenbank-Verbindung erfolgreich!");
+        if (querySnapshot.empty) {
+            console.log("📚 Die 'books' Sammlung ist noch leer.");
+        } else {
+            console.log(`📚 ${querySnapshot.docs.length} Dokumente in 'books' gefunden.`);
+        }
+      } catch (error) {
+        console.error("🔥 Fehler bei der Datenbank-Verbindung:", error);
+      }
+    };
+    
+    testDbConnection(); // Ruft die Test-Funktion auf
+
+    // Aufräumfunktion, die beim Verlassen der Komponente ausgeführt wird
     return () => unsubscribe();
   }, []);
 
   const handleLogout = async () => {
     await signOut(auth);
     setUser(null);
-    navigate('/login'); // Nach Abmeldung zum Login weiterleiten
+    navigate('/login');
   };
 
   return (
