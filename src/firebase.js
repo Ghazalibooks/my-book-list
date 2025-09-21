@@ -1,7 +1,10 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore"; // Firestore importieren
+// src/firebase.js
 
+// Importiere die nötigen Funktionen von den Firebase SDKs
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+
+// Dein persönlicher Konfigurations-Code von Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCJS7twiAm9Wp5LkOuJKCSQl8xi0SD1t7E",
   authDomain: "ghazalibooklistapp.firebaseapp.com",
@@ -12,7 +15,9 @@ const firebaseConfig = {
   measurementId: "G-8JME6971T3"
 };
 
-// Firebase initialisieren
+// Initialisiere Firebase
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app); // Firestore initialisieren
+
+// Initialisiere die Firestore-Datenbank und exportiere sie,
+// damit du sie in anderen Dateien deines Projekts (z.B. in App.js) verwenden kannst.
+export const db = getFirestore(app);
