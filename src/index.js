@@ -1,15 +1,14 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { BrowserRouter } from 'react-router-dom';  // Router hier platzieren
-import './index.css';
+import ReactDOM from 'react-dom/client';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import { ChakraProvider } from '@chakra-ui/react'; // 1. ChakraProvider importieren
 
-ReactDOM.render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>,
-  document.getElementById('root')
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    {/* 2. Deine gesamte App mit dem ChakraProvider umwickeln */}
+    <ChakraProvider>
+      <App />
+    </ChakraProvider>
+  </React.StrictMode>
 );
-
-reportWebVitals();
